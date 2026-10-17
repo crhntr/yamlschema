@@ -1,0 +1,8 @@
+yamlschema -schema schema.json ok.yaml
+! stdout .
+! stderr .
+
+-- schema.json --
+{"type":"object","required":["name"],"properties":{"name":{"type":"string"}}}
+-- ok.yaml --
+name: web

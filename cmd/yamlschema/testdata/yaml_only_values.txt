@@ -1,0 +1,13 @@
+# .inf, tags and non-string keys have a JSON stand-in a schema can check.
+yamlschema -schema schema.json ok.yaml
+! yamlschema -schema schema.json bad.yaml
+stdout '^bad.yaml:1:'
+
+-- schema.json --
+{"type":"object","properties":{"limit":{"enum":["Infinity",5]},"blob":{"type":"string","contentEncoding":"base64"}},"propertyNames":{"pattern":"^[a-z0-9]+$"}}
+-- ok.yaml --
+limit: .inf
+blob: !!binary aGVsbG8=
+1: one
+-- bad.yaml --
+limit: .nan

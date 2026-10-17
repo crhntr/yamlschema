@@ -1,0 +1,18 @@
+# Merge keys and aliases are expanded before validation.
+yamlschema -schema schema.json ok.yaml
+! yamlschema -schema schema.json bad.yaml
+stdout '^bad.yaml:5:'
+
+-- schema.json --
+{"type":"object","additionalProperties":{"type":"object","required":["image","replicas"],"properties":{"replicas":{"type":"integer"}}}}
+-- ok.yaml --
+base: &base {image: app, replicas: 1}
+web:
+  <<: *base
+  replicas: 3
+-- bad.yaml --
+base: &base {image: app, replicas: 1}
+web:
+  <<: *base
+worker:
+  replicas: two

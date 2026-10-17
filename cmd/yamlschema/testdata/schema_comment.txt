@@ -1,0 +1,12 @@
+yamlschema ok.yaml
+! yamlschema bad.yaml
+stdout '^bad.yaml:2:4:'
+
+-- schema.json --
+{"type":"object","properties":{"a":{"type":"string"}}}
+-- ok.yaml --
+# yaml-language-server: $schema=schema.json
+a: x
+-- bad.yaml --
+# yaml-language-server: $schema=schema.json
+a: 1

@@ -1,0 +1,14 @@
+! yamlschema -schema schema.json missing.yaml
+stderr 'missing.yaml'
+! yamlschema -schema schema.json alias.yaml
+stderr 'no anchor named "nope"'
+! yamlschema -schema schema.json key.yaml
+stderr 'invalid key'
+
+-- schema.json --
+{}
+-- alias.yaml --
+a: *nope
+-- key.yaml --
+? [1, 2]
+: x

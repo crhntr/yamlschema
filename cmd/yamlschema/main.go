@@ -24,36 +24,46 @@ import (
 )
 
 func main() {
-	dir := flag.String("C", "", "change to `dir` first")
-	schemaFlag := flag.String("schema", "", "schema `file or URL` (default: the file's yaml-language-server comment)")
-	remote := flag.Bool("remote", false, "let a file's schema comment name a URL")
-	flag.Parse()
-	if *dir != "" {
-		if err := os.Chdir(*dir); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(2)
-		}
+	os.Exit(run(context.Background(), ".", os.Args[1:], os.Stdout, os.Stderr))
+}
+
+// run is main with its inputs passed in. It returns the exit status:
+// 0 when every file is valid, 1 when a file has problems or cannot be
+// checked, 2 for bad usage.
+func run(ctx context.Context, dir string, args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("yamlschema", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	chdir := flags.String("C", "", "change to `dir` first")
+	schemaFlag := flags.String("schema", "", "schema `file or URL` (default: the file's yaml-language-server comment)")
+	remote := flags.Bool("remote", false, "let a file's schema comment name a URL")
+	if err := flags.Parse(args); err != nil {
+		return 2
 	}
-	if flag.NArg() == 0 {
-		flag.Usage()
-		os.Exit(2)
+	if flags.NArg() == 0 {
+		fmt.Fprintln(stderr, "usage: yamlschema [-C dir] [-schema file-or-url] [-remote] file.yaml ...")
+		return 2
+	}
+	if *chdir != "" {
+		dir = filepath.Join(dir, *chdir)
 	}
 	failed := false
 	schemas := map[string]*yamlschema.Schema{}
-	for _, name := range flag.Args() {
-		ok, err := check(context.Background(), os.Stdout, schemas, *schemaFlag, *remote, name)
+	for _, name := range flags.Args() {
+		ok, err := check(ctx, stdout, schemas, dir, *schemaFlag, *remote, name)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v\n", name, err)
-			failed = true
+			fmt.Fprintf(stderr, "%s: %v\n", name, err)
 		}
-		failed = failed || !ok
+		failed = failed || err != nil || !ok
 	}
 	if failed {
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }
 
-func check(ctx context.Context, w io.Writer, schemas map[string]*yamlschema.Schema, schemaRef string, remote bool, name string) (bool, error) {
+func check(ctx context.Context, w io.Writer, schemas map[string]*yamlschema.Schema, dir, schemaRef string, remote bool, name string) (bool, error) {
+	shown := name
+	name = filepath.Join(dir, name)
 	src, err := os.ReadFile(name)
 	if err != nil {
 		return false, err
@@ -94,7 +104,7 @@ func check(ctx context.Context, w io.Writer, schemas map[string]*yamlschema.Sche
 		case isURL:
 			body, err = fetch(ctx, ref)
 		case trusted:
-			body, err = readLimited(os.Open(ref))
+			body, err = readLimited(os.Open(filepath.Join(dir, ref)))
 		default:
 			body, err = readInDir(filepath.Dir(name), ref)
 		}
@@ -112,7 +122,7 @@ func check(ctx context.Context, w io.Writer, schemas map[string]*yamlschema.Sche
 		return false, err
 	}
 	for _, p := range problems {
-		fmt.Fprintf(w, "%s:%d:%d: %s\n", name, p.Pos.Line, p.Pos.Column, p.Message)
+		fmt.Fprintf(w, "%s:%d:%d: %s\n", shown, p.Pos.Line, p.Pos.Column, p.Message)
 	}
 	return len(problems) == 0, nil
 }

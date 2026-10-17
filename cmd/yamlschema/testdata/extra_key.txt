@@ -1,0 +1,10 @@
+# An unexpected key is blamed on the key, not its value.
+! yamlschema -schema schema.json bad.yaml
+stdout '^bad.yaml:3:1:'
+
+-- schema.json --
+{"type":"object","properties":{"name":{"type":"string"}},"additionalProperties":false}
+-- bad.yaml --
+name: web
+port: 80
+host: x

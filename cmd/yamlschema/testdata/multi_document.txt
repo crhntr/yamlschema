@@ -1,0 +1,11 @@
+! yamlschema -schema schema.json many.yaml
+stdout '^many.yaml:4:4:'
+! stdout 'many.yaml:1'
+
+-- schema.json --
+{"type":"object","properties":{"n":{"type":"integer"}}}
+-- many.yaml --
+n: 1
+---
+other: 2
+n: three

@@ -1,0 +1,4 @@
+! yamlschema
+stderr 'usage: yamlschema'
+! yamlschema -bogus x.yaml
+stderr 'flag provided but not defined'

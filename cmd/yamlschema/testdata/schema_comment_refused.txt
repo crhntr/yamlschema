@@ -1,0 +1,27 @@
+# A schema named inside a file cannot reach outside the file's directory,
+# fetch a URL, or follow a symlink out; -schema is trusted.
+! yamlschema up.yaml
+stderr 'leaves the file.s directory'
+! yamlschema url.yaml
+stderr 'pass -remote'
+! yamlschema scheme.yaml
+stderr 'only http and https'
+! yamlschema none.yaml
+stderr 'no schema'
+yamlschema -schema schema.json sub/plain.yaml
+
+-- schema.json --
+{"type":"object"}
+-- up.yaml --
+# yaml-language-server: $schema=../schema.json
+a: 1
+-- url.yaml --
+# yaml-language-server: $schema=https://example.com/s.json
+a: 1
+-- scheme.yaml --
+# yaml-language-server: $schema=file:///etc/hosts
+a: 1
+-- none.yaml --
+a: 1
+-- sub/plain.yaml --
+a: 1

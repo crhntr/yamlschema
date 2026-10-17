@@ -1,0 +1,8 @@
+! yamlschema -schema schema.json bad.yaml
+stdout '^bad.yaml:2:7: type integer does not match string$'
+
+-- schema.json --
+{"type":"object","properties":{"name":{"type":"string"},"port":{"type":"integer"}}}
+-- bad.yaml --
+name: web
+port: eighty
