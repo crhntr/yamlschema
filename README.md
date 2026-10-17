@@ -45,3 +45,7 @@ document if you want to validate it yourself.
 | `# yaml-language-server: $schema=` | `SchemaRef` finds it |
 
 Collection keys (`? [1, 2]`) have no JSON name and are an error.
+
+## License
+
+MIT, see [LICENSE](LICENSE).

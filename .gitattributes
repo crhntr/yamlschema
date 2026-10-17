@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+*.go text eol=lf diff=golang
+*.md text eol=lf diff=markdown
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+go.sum linguist-generated=true -diff
