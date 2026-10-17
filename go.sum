@@ -1,5 +1,5 @@
-github.com/crhntr/jsonschema v0.0.0-dev.8.0.20261015075556-61d76136088b h1:HqOOu7y5puzVOiW1w83/Sa70Yx1/paAy+2Z51Sinndw=
-github.com/crhntr/jsonschema v0.0.0-dev.8.0.20261015075556-61d76136088b/go.mod h1:mHSFu1hGzC/kqyKglIapENzMMVKlSDr9D37AVnc3Nns=
+github.com/crhntr/jsonschema v0.1.0 h1:tjE0RCeQx7Ur3Ig3fwv09s8Ugv1crsIQZymYSnpasLE=
+github.com/crhntr/jsonschema v0.1.0/go.mod h1:mHSFu1hGzC/kqyKglIapENzMMVKlSDr9D37AVnc3Nns=
 github.com/goccy/go-yaml v1.19.2 h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=
 github.com/goccy/go-yaml v1.19.2/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
 golang.org/x/net v0.61.0 h1:RR+6j/BTBCrggOLugxa+66R8FvoN6MHlzDlZIbN9YFw=
