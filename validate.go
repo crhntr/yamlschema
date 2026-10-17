@@ -17,11 +17,16 @@ type Schema struct {
 }
 
 // ParseSchema reads a JSON Schema written as JSON or as YAML. References
-// to other documents are fetched with client, which may be nil.
+// to other documents are fetched with client. A nil client fetches
+// nothing, so a schema from an untrusted source cannot make requests; pass
+// a client to allow it.
 func ParseSchema(ctx context.Context, client *http.Client, src []byte) (*Schema, error) {
 	body := src
 	if docs, err := Parse(src); err == nil && len(docs) == 1 {
 		body = docs[0].JSON
+	}
+	if client == nil {
+		client = &http.Client{Transport: noNetwork{}}
 	}
 	r := jsonschema.NewResolver(client)
 	const uri = "urn:yamlschema:schema"
@@ -126,7 +131,9 @@ func SchemaRef(src []byte) string {
 			continue
 		}
 		if _, ref, ok := strings.Cut(rest, "$schema="); ok {
-			return strings.Fields(ref)[0]
+			if f := strings.Fields(ref); len(f) > 0 {
+				return f[0]
+			}
 		}
 	}
 	return ""
@@ -141,4 +148,11 @@ func blamesKey(keywordLocation string) bool {
 		}
 	}
 	return false
+}
+
+// noNetwork refuses every request.
+type noNetwork struct{}
+
+func (noNetwork) RoundTrip(r *http.Request) (*http.Response, error) {
+	return nil, fmt.Errorf("fetching %s: network access is off", r.URL)
 }

@@ -122,6 +122,7 @@ func TestSchemaRef(t *testing.T) {
 		{"---\n# a note\n# yaml-language-server: $schema=./s.json extra\na: 1\n", "./s.json"},
 		{"a: 1\n# yaml-language-server: $schema=late.json\n", ""},
 		{"a: 1\n", ""},
+		{"# yaml-language-server: $schema=\n", ""},
 	} {
 		if got := yamlschema.SchemaRef([]byte(tt.src)); got != tt.want {
 			t.Errorf("SchemaRef(%q) = %q, want %q", tt.src, got, tt.want)

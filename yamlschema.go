@@ -142,12 +142,20 @@ func (c *converter) note(ptr string, at Pos) {
 	}
 }
 
-func (c *converter) value(n ast.Node, ptr string, depth int) error {
+// spend counts one step of work against the document's budget.
+func (c *converter) spend(depth int) error {
 	if depth > maxDepth {
-		return fmt.Errorf("%s: nested too deeply", pointerText(ptr))
+		return errors.New("nested too deeply")
 	}
 	if c.nodes++; c.nodes > maxNodes {
 		return errors.New("the document expands to too much data")
+	}
+	return nil
+}
+
+func (c *converter) value(n ast.Node, ptr string, depth int) error {
+	if err := c.spend(depth); err != nil {
+		return fmt.Errorf("%s: %w", pointerText(ptr), err)
 	}
 	c.note(ptr, start(n))
 	switch n := n.(type) {
@@ -282,11 +290,14 @@ func (c *converter) mapping(values []*ast.MappingValueNode, ptr string, depth in
 // members lists a mapping's keys in order: merged keys first, then the
 // mapping's own, which override them.
 func (c *converter) members(values []*ast.MappingValueNode, depth int) ([]member, error) {
-	if depth > maxDepth {
-		return nil, errors.New("merges nested too deeply")
+	if err := c.spend(depth); err != nil {
+		return nil, err
 	}
 	var merged, own []member
 	for _, mv := range values {
+		if err := c.spend(depth); err != nil {
+			return nil, err
+		}
 		if _, ok := mv.Key.(*ast.MergeKeyNode); ok {
 			from, err := c.mergeSources(mv.Value, depth)
 			if err != nil {
@@ -316,6 +327,9 @@ func (c *converter) members(values []*ast.MappingValueNode, depth int) ([]member
 
 // mergeSources returns the mappings a merge key brings in.
 func (c *converter) mergeSources(n ast.Node, depth int) ([][]*ast.MappingValueNode, error) {
+	if err := c.spend(depth); err != nil {
+		return nil, err
+	}
 	switch n := n.(type) {
 	case *ast.AnchorNode:
 		c.anchors[nameOf(n.Name)] = n.Value
